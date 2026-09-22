@@ -1,4 +1,4 @@
-import { apiGet } from "./api.js";
+import { apiGet, describeApiError } from "./api.js";
 
 export async function cargarCompanias(shadow, apiUrl) {
 
@@ -84,11 +84,21 @@ export async function cargarCompanias(shadow, apiUrl) {
             error
         );
 
-        select.innerHTML = `
-            <option value="">
-                Error cargando compañías
-            </option>
-        `;
+        const message =
+            describeApiError(
+                error,
+                "Error cargando compañías."
+            );
+
+        select.innerHTML = "";
+
+        const option =
+            document.createElement("option");
+
+        option.value = "";
+        option.textContent = message;
+
+        select.appendChild(option);
 
     } finally {
 

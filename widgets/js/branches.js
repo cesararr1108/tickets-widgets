@@ -1,4 +1,4 @@
-import { apiGet } from "./api.js";
+import { apiGet, describeApiError } from "./api.js";
 
 export async function cargarBranches(
     shadow,
@@ -110,11 +110,21 @@ export async function cargarBranches(
             error
         );
 
-        select.innerHTML = `
-            <option value="">
-                Error cargando sucursales
-            </option>
-        `;
+        const message =
+            describeApiError(
+                error,
+                "Error cargando sucursales."
+            );
+
+        select.innerHTML = "";
+
+        const option =
+            document.createElement("option");
+
+        option.value = "";
+        option.textContent = message;
+
+        select.appendChild(option);
 
     } finally {
 

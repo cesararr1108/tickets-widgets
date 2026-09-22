@@ -1,6 +1,8 @@
 import {
+    apiGet,
     apiPost,
-    apiUpload
+    apiUpload,
+    describeApiError
 } from "./api.js";
 
 export async function crearTicket(
@@ -9,43 +11,60 @@ export async function crearTicket(
     file = null
 ) {
 
-    /*
-     * Si no hay archivo, enviamos JSON.
-     */
-    if (!file) {
+    try {
 
-        return await apiPost(
-            apiUrl,
-            "/tickets",
-            data
-        );
-    }
+        /*
+         * Si no hay archivo, enviamos JSON.
+         */
+        if (!file) {
 
-    /*
-     * Si hay archivo, usamos multipart/form-data.
-     */
-    const formData =
-        new FormData();
-
-    Object.entries(data).forEach(
-        ([key, value]) => {
-            formData.append(
-                key,
-                value ?? ""
+            return await apiPost(
+                apiUrl,
+                "/tickets",
+                data
             );
         }
-    );
 
-    formData.append(
-        "file",
-        file
-    );
+        /*
+         * Si hay archivo, usamos multipart/form-data.
+         */
+        const formData =
+            new FormData();
 
-    return await apiUpload(
-        apiUrl,
-        "/tickets",
-        formData
-    );
+        Object.entries(data).forEach(
+            ([key, value]) => {
+                formData.append(
+                    key,
+                    value ?? ""
+                );
+            }
+        );
+
+        formData.append(
+            "file",
+            file
+        );
+
+        return await apiUpload(
+            apiUrl,
+            "/tickets",
+            formData
+        );
+
+    } catch (error) {
+
+        console.error(
+            "[Tickets Widget] Error creando ticket:",
+            error
+        );
+
+        throw new Error(
+            describeApiError(
+                error,
+                "No fue posible crear el ticket."
+            )
+        );
+    }
 }
 
 export async function cargarMisTickets(
@@ -75,26 +94,11 @@ export async function cargarMisTickets(
          * Cuando tengas autenticación, aquí podemos
          * enviar el usuario/token correspondiente.
          */
-        const response =
-            await fetch(
-                apiUrl.replace(/\/$/, "") +
-                "/tickets",
-                {
-                    method: "GET",
-                    headers: {
-                        "Accept": "application/json"
-                    }
-                }
-            );
-
-        if (!response.ok) {
-            throw new Error(
-                `Error HTTP ${response.status}`
-            );
-        }
-
         const result =
-            await response.json();
+            await apiGet(
+                apiUrl,
+                "/tickets"
+            );
 
         console.log(
             "[Tickets Widget] Tickets:",
@@ -171,9 +175,15 @@ export async function cargarMisTickets(
             error
         );
 
+        const message =
+            describeApiError(
+                error,
+                "No fue posible cargar tus tickets."
+            );
+
         list.innerHTML = `
             <div class="tw-empty">
-                No fue posible cargar tus tickets.
+                ${escapeHtml(message)}
             </div>
         `;
     }

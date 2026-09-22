@@ -196,3 +196,33 @@ export async function apiUpload(apiUrl, endpoint, formData) {
         }
     );
 }
+
+
+// ==========================================
+// MENSAJES DE ERROR PARA MOSTRAR AL USUARIO
+// ==========================================
+const STATUS_MESSAGES = {
+    400: "La solicitud no es válida.",
+    401: "No autorizado. Verifica las credenciales de acceso a la API.",
+    403: "No tienes permisos para realizar esta acción.",
+    404: "No se encontró el recurso solicitado.",
+    408: "La solicitud tardó demasiado. Intenta nuevamente.",
+    429: "Demasiadas solicitudes. Intenta nuevamente en unos segundos."
+};
+
+export function describeApiError(error, fallback = "Ocurrió un error inesperado.") {
+
+    if (!(error instanceof ApiError)) {
+        return error?.message || fallback;
+    }
+
+    if (error.status === null) {
+        return error.message || fallback;
+    }
+
+    if (error.status >= 500) {
+        return "Error interno del servidor. Intenta nuevamente más tarde.";
+    }
+
+    return STATUS_MESSAGES[error.status] || error.message || fallback;
+}
