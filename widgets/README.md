@@ -5,7 +5,7 @@ Widget de soporte para insertar en cualquier página.
 ## Estructura
 
 ```text
-widget/
+widgets/
 ├── tickets.js
 ├── README.md
 └── js/
@@ -20,18 +20,26 @@ widget/
 Copiar esta carpeta dentro de:
 
 ```text
-/var/www/tickets-codeigniter4/public/widget/
+/var/www/tickets-codeigniter4/public/widgets/
 ```
 
 Debe quedar:
 
 ```text
-/var/www/tickets-codeigniter4/public/widget/tickets.js
-/var/www/tickets-codeigniter4/public/widget/js/api.js
-/var/www/tickets-codeigniter4/public/widget/js/companies.js
-/var/www/tickets-codeigniter4/public/widget/js/branches.js
-/var/www/tickets-codeigniter4/public/widget/js/tickets.js
+/var/www/tickets-codeigniter4/public/widgets/tickets.js
+/var/www/tickets-codeigniter4/public/widgets/js/api.js
+/var/www/tickets-codeigniter4/public/widgets/js/companies.js
+/var/www/tickets-codeigniter4/public/widgets/js/branches.js
+/var/www/tickets-codeigniter4/public/widgets/js/tickets.js
 ```
+
+> IMPORTANTE: el nombre de la carpeta pública debe ser exactamente
+> `widgets` (con "s"). El archivo `tickets.js` carga sus módulos con
+> `import()` usando la ruta fija `/widgets/js/...` (ver más abajo), así
+> que si la carpeta se publica como `widget` (sin "s") los imports
+> dinámicos fallarán con `TypeError: Failed to fetch dynamically
+> imported module`, aunque el `<script>` principal y los endpoints de
+> `/api` funcionen sin problema.
 
 ## Uso desde otra página
 
@@ -39,7 +47,7 @@ Debe quedar:
 <div id="tickets-widget"></div>
 
 <script
-    src="https://200.122.206.204:8081/widget/tickets.js"
+    src="https://200.122.206.204:8081/widgets/tickets.js"
     data-container="tickets-widget"
     data-api="https://200.122.206.204:8081/api">
 </script>
