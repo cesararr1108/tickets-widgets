@@ -1,6 +1,6 @@
 import { apiGet, describeApiError } from "./api.js";
 
-export async function cargarCompanias(shadow, apiUrl) {
+export async function cargarCompanias(shadow, apiUrl, preselectId = "") {
 
     const select =
         shadow.getElementById("ticketCompany");
@@ -76,6 +76,23 @@ export async function cargarCompanias(shadow, apiUrl) {
 
             select.appendChild(option);
         });
+
+        if (preselectId) {
+
+            const hasMatch =
+                Array.from(select.options).some(
+                    option => option.value === String(preselectId)
+                );
+
+            if (hasMatch) {
+                select.value = String(preselectId);
+            } else {
+                console.warn(
+                    "[Tickets Widget] La compañía preseleccionada " +
+                    `"${preselectId}" no está entre las disponibles.`
+                );
+            }
+        }
 
     } catch (error) {
 

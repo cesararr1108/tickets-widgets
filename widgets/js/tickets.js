@@ -69,7 +69,8 @@ export async function crearTicket(
 
 export async function cargarMisTickets(
     shadow,
-    apiUrl
+    apiUrl,
+    userId
 ) {
 
     const list =
@@ -90,14 +91,20 @@ export async function cargarMisTickets(
     try {
 
         /*
-         * Endpoint provisional.
-         * Cuando tengas autenticación, aquí podemos
-         * enviar el usuario/token correspondiente.
+         * Si el anfitrión pasó data-user-id, filtramos por ese
+         * usuario. Si no, se listan todos los tickets (comportamiento
+         * anterior).
          */
+        const endpoint =
+            "/tickets" +
+            (userId
+                ? "?user_id=" + encodeURIComponent(userId)
+                : "");
+
         const result =
             await apiGet(
                 apiUrl,
-                "/tickets"
+                endpoint
             );
 
         console.log(

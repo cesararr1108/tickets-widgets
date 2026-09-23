@@ -3,7 +3,8 @@ import { apiGet, describeApiError } from "./api.js";
 export async function cargarBranches(
     shadow,
     apiUrl,
-    companyId
+    companyId,
+    preselectId = ""
 ) {
 
     const select =
@@ -102,6 +103,23 @@ export async function cargarBranches(
 
             select.appendChild(option);
         });
+
+        if (preselectId) {
+
+            const hasMatch =
+                Array.from(select.options).some(
+                    option => option.value === String(preselectId)
+                );
+
+            if (hasMatch) {
+                select.value = String(preselectId);
+            } else {
+                console.warn(
+                    "[Tickets Widget] La sucursal preseleccionada " +
+                    `"${preselectId}" no está entre las disponibles.`
+                );
+            }
+        }
 
     } catch (error) {
 

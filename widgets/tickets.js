@@ -4,10 +4,22 @@
  *
  * <div id="tickets-widget"></div>
  * <script
- *   src="https://200.122.206.204:8081/widget/tickets.js"
+ *   src="https://200.122.206.204:8081/widgets/tickets.js"
  *   data-container="tickets-widget"
- *   data-api="https://200.122.206.204:8081/api">
+ *   data-api="https://200.122.206.204:8081/api"
+ *   data-company-id="12"
+ *   data-branch-id="34"
+ *   data-user-id="56"
+ *   data-user-name="Juan Pérez">
  * </script>
+ *
+ * Los atributos data-company-id/data-branch-id son opcionales: si la
+ * página anfitriona ya sabe la compañía/sucursal del usuario, se usan
+ * para preseleccionar esos campos (el usuario igual puede cambiarlos).
+ *
+ * data-user-id/data-user-name son opcionales: si se pasan, se envían
+ * junto con cada ticket nuevo y se usan para filtrar "Mis tickets" por
+ * ese usuario.
  */
 
 (() => {
@@ -19,6 +31,18 @@
     const apiUrl =
         currentScript?.dataset.api ||
         "https://200.122.206.204:8081/api";
+
+    const initialCompanyId =
+        currentScript?.dataset.companyId || "";
+
+    const initialBranchId =
+        currentScript?.dataset.branchId || "";
+
+    const userId =
+        currentScript?.dataset.userId || "";
+
+    const userName =
+        currentScript?.dataset.userName || "";
 
     const container = document.getElementById(containerId);
 
@@ -615,8 +639,17 @@
         overlay.setAttribute("aria-hidden", "false");
 
         if (!company.dataset.loaded) {
-            await cargarCompanias(shadow, apiUrl);
+            await cargarCompanias(shadow, apiUrl, initialCompanyId);
             company.dataset.loaded = "1";
+
+            if (initialCompanyId) {
+                await cargarBranches(
+                    shadow,
+                    apiUrl,
+                    initialCompanyId,
+                    initialBranchId
+                );
+            }
         }
     }
 
@@ -672,7 +705,8 @@
             if (!isNew) {
                 await cargarMisTickets(
                     shadow,
-                    apiUrl
+                    apiUrl,
+                    userId
                 );
             }
         });
@@ -709,7 +743,10 @@
                 shadow.getElementById("ticketSubcategory").value,
 
             description:
-                shadow.getElementById("ticketDescription").value.trim()
+                shadow.getElementById("ticketDescription").value.trim(),
+
+            user_id: userId,
+            user_name: userName
         };
 
         if (!data.company_id) {
@@ -792,7 +829,7 @@
 
     shadow.getElementById("refreshTickets")
         .addEventListener("click", () => {
-            cargarMisTickets(shadow, apiUrl);
+            cargarMisTickets(shadow, apiUrl, userId);
         });
 
     // API pública opcional.
@@ -810,17 +847,17 @@
  * anfitriona solo tenga que incluir tickets.js.
  */
 
-async function cargarCompanias(shadow, apiUrl) {
+async function cargarCompanias(shadow, apiUrl, preselectId) {
     const module =
         await import(
             apiUrl.replace(/\/api\/?$/, "") +
             "/widgets/js/companies.js"
         );
 
-    return module.cargarCompanias(shadow, apiUrl);
+    return module.cargarCompanias(shadow, apiUrl, preselectId);
 }
 
-async function cargarBranches(shadow, apiUrl, companyId) { console.log("cargarBranches")
+async function cargarBranches(shadow, apiUrl, companyId, preselectId) {
     const module =
         await import(
             apiUrl.replace(/\/api\/?$/, "") +
@@ -830,7 +867,8 @@ async function cargarBranches(shadow, apiUrl, companyId) { console.log("cargarBr
     return module.cargarBranches(
         shadow,
         apiUrl,
-        companyId
+        companyId,
+        preselectId
     );
 }
 
@@ -844,7 +882,7 @@ async function crearTicket(apiUrl, data, file) {
     return module.crearTicket(apiUrl, data, file);
 }
 
-async function cargarMisTickets(shadow, apiUrl) {
+async function cargarMisTickets(shadow, apiUrl, userId) {
     const module =
         await import(
             apiUrl.replace(/\/api\/?$/, "") +
@@ -853,6 +891,7 @@ async function cargarMisTickets(shadow, apiUrl) {
 
     return module.cargarMisTickets(
         shadow,
-        apiUrl
+        apiUrl,
+        userId
     );
 }
